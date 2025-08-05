@@ -19,12 +19,6 @@
           
           echo "🐍 Installing Python Neovim profile..."
           
-          # Create profiles directory if it doesn't exist
-          mkdir -p "$NVIM_PROFILES_DIR"
-          
-          # Remove existing python profile if it exists
-          rm -rf "$PYTHON_PROFILE_DIR"
-          
           # Copy Python profile to nvim profiles directory
           cp -r "${./python}" "$PYTHON_PROFILE_DIR"
           
