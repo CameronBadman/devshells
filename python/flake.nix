@@ -25,43 +25,32 @@
           git
         ];
         
+        # Create Neovim profile package
+        nvim-python-profile = pkgs.stdenv.mkDerivation {
+          name = "nvim-python-profile";
+          src = ./python;
+          
+          installPhase = ''
+            mkdir -p $out/share/nvim-profiles/python
+            cp init.lua $out/share/nvim-profiles/python/init.lua
+            echo "Python Neovim profile installed"
+          '';
+        };
+        
       in {
         packages = {
-          default = pkgs.stdenv.mkDerivation {
+          default = pkgs.symlinkJoin {
             name = "python-dev-profile";
-            src = ./.;
-            
-            installPhase = ''
-              # Create output directories
-              mkdir -p $out/bin $out/share/nvim-profiles/python
-              
-              # Install Python development tools
-              ${builtins.concatStringsSep "\n" (map (tool: ''
-                if [ -d "${tool}/bin" ]; then
-                  cp -r ${tool}/bin/* $out/bin/ 2>/dev/null || true
-                fi
-              '') pythonTools)}
-              
-              # Install Neovim profile
-              cp python/init.lua $out/share/nvim-profiles/python/init.lua
-              
-              echo "Python development profile with Neovim integration installed"
-            '';
-            
-            buildInputs = pythonTools;
+            paths = pythonTools ++ [ nvim-python-profile ];
           };
         };
         
         devShells.default = pkgs.mkShell {
-          buildInputs = pythonTools ++ [
-            pkgs.curl
-            pkgs.python3Packages.virtualenv
-          ];
+          buildInputs = pythonTools;
           
           shellHook = ''
             echo "🐍 Python development environment loaded!"
             echo "📦 Available tools: python3, pyright, black, ruff, pytest, mypy"
-            echo "📝 Neovim profile will be available after 'nix profile install'"
             
             # Set up Python environment
             export PYTHONPATH="$PWD:$PYTHONPATH"
